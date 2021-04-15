@@ -32,6 +32,16 @@ client.connect(err => {
             })
     })
 
+    app.post('/addServices', (req, res) => {
+        const service = req.body;
+        console.log(service)
+        usersCollection.insertOne(service)
+            .then(result => {
+                res.send(result.insertedCount > 0)
+            })
+    })
+
+
 
 });
 
