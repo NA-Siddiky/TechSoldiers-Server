@@ -26,11 +26,47 @@ client.connect(err => {
 
     console.log("Error is:", err)
 
-    const usersCollection = client.db("tech-soldiers").collection("users");
-    const servicesCollection = client.db("tech-soldiers").collection("services");
-    const orderCollection = client.db("tech-soldiers").collection("order");
-
     console.log("Database connected Successfully")
+
+    //  users Section //
+
+    const usersCollection = client.db("tech-soldiers").collection("users");
+
+
+    app.get('/allusers', (req, res) => {
+        usersCollection.find().toArray((err, items) => {
+            res.send([...items]);
+        });
+    });
+
+    app.get('/makeAdmin/:email', async (req, res) => {
+        const email = req.params.email
+        console.log(email)
+        const data = await usersCollection.updateOne({ "email": email }, { $set: { "role": 'admin' } });
+        res.send({ message: 'update Successfully' })
+    });
+
+    app.post('/addUser', (req, res) => {
+        const user = req.body;
+        const { email } = user;
+        usersCollection.findOne({ email }, (err, data) => {
+            console.log(data, 'from server');
+            if (data) {
+                res.send(data)
+            } else {
+                usersCollection.insertOne(user)
+                    .then(result => {
+                        if (result.insertedCount > 0) {
+                            res.send(result.ops[0])
+                        }
+                    })
+            }
+        })
+
+    })
+
+    //  services Section //
+    const servicesCollection = client.db("tech-soldiers").collection("services");
 
     app.get('/services', (req, res) => {
         servicesCollection.find().toArray((err, items) => {
@@ -38,24 +74,12 @@ client.connect(err => {
         });
     });
 
-
-    // Get Single Book By Id
     app.get('/checkout/:id', (req, res) => {
         const id = new ObjectId(req.params.id);
         servicesCollection.find({ _id: id }).toArray((err, items) => {
             res.send(items);
         });
     });
-
-
-    app.post('/addUser', (req, res) => {
-        const user = req.body;
-        console.log(user)
-        usersCollection.insertOne(user)
-            .then(result => {
-                res.send(result.insertedCount > 0)
-            })
-    })
 
     app.post('/addServices', (req, res) => {
         const newServices = req.body;
@@ -67,7 +91,10 @@ client.connect(err => {
             })
     })
 
-    // save Order
+    // Order Section    //
+
+    const orderCollection = client.db("tech-soldiers").collection("order");
+
     app.post('/saveorder', (req, res) => {
         const newOrder = req.body;
         console.log(newOrder);
@@ -79,11 +106,37 @@ client.connect(err => {
         });
     });
 
+    app.get("/getOrders", (req, res) => {
+        orderCollection.find({}).toArray((err, documents) => {
+            res.send(documents);
+        });
+    });
+    //  reviews section //
+
+    const reviewsCollection = client.db("tech-soldiers").collection("reviews");
+
+    app.get("/getReviews", (req, res) => {
+        reviewsCollection.find({}).toArray((err, documents) => {
+            res.send(documents);
+        });
+    });
+
+    app.post("/addReviews", (req, res) => {
+        const field = req.body;
+        reviewsCollection.insertMany(field).then(result => {
+            res.send(result);
+            console.log(result.insertedCount);
+        });
+    });
+
+    app.post("/addSingleReview", (req, res) => {
+        const NewReview = req.body;
+        reviewsCollection.insertOne(NewReview).then(result => {
+            res.send(result.ops[0]);
+        });
+    });
+
 });
-
-
-
-
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
