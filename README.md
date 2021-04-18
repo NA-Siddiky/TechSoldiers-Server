@@ -7,7 +7,7 @@
 ### Project name:- *Tech Soldiers*
 
 Live Site Link: 
-1. Heroku Server Live Link:- [Developers Book Gallery Heroku link](https://techsoldiers.herokuapp.com/)
+1. Heroku Server Live Link:- [Tech Solders](https://techsoldiers.herokuapp.com/)
 
 GitHub Link:-
 2. Client side : https://github.com/Porgramming-Hero-web-course/complete-website-client-NA-Siddiky.git
